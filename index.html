@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportZone | Tienda Deportiva de Alto Rendimiento</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;800&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">Sport<span class="highlight">Zone</span></div>
+            <nav class="nav-links">
+                <a href="#inicio">Inicio</a>
+                <a href="#productos">Productos</a>
+                <a href="#ofertas">Ofertas</a>
+                <a href="#contacto">Contacto</a>
+            </nav>
+            <div class="nav-icons">
+                <i class="fas fa-search" title="Buscar"></i>
+                <i class="fas fa-shopping-cart" title="Carrito"></i>
+                <a href="/login" style="color: inherit;"><i class="fas fa-user" title="Perfil/Login"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <h1>ROMPE TUS <span class="highlight">LÍMITES</span></h1>
+            <p>Descubre el equipamiento de alto rendimiento diseñado para verdaderos atletas. Supera cada marca con nuestra nueva colección.</p>
+            <button class="btn btn-primary">Descubrir Ahora</button>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="productos" class="products container">
+        <div class="section-title">
+            <h2>NUEVOS <span>LANZAMIENTOS</span></h2>
+            <p>La mejor tecnología y comodidad para tu deporte favorito</p>
+        </div>
+        
+        <div class="product-grid">
+            <!-- Producto 1 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Zapatillas Running Pro">
+                    <span class="badge">Nuevo</span>
+                </div>
+                <div class="product-info">
+                    <h3>Zapatillas UltraRun X</h3>
+                    <p class="price">$129.99</p>
+                    <button class="btn btn-outline">Añadir al Carrito</button>
+                </div>
+            </div>
+
+            <!-- Producto 2 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="https://images.unsplash.com/photo-1584735174965-48c48d7cdfde?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Ropa Deportiva de Compresión">
+                </div>
+                <div class="product-info">
+                    <h3>Polo Compresión AeroFit</h3>
+                    <p class="price">$45.00</p>
+                    <button class="btn btn-outline">Añadir al Carrito</button>
+                </div>
+            </div>
+
+            <!-- Producto 3 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="https://images.unsplash.com/photo-1556817411-31ae72fa3ea8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Smartwatch Deportivo">
+                    <span class="badge sale">-20%</span>
+                </div>
+                <div class="product-info">
+                    <h3>SportWatch Elite</h3>
+                    <p class="price"><span class="old-price">$199.99</span> $159.99</p>
+                    <button class="btn btn-outline">Añadir al Carrito</button>
+                </div>
+            </div>
+
+            <!-- Producto 4 -->
+            <div class="product-card">
+                <div class="product-img">
+                    <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Bolso Deportivo">
+                </div>
+                <div class="product-info">
+                    <h3>Bolso Gym Master</h3>
+                    <p class="price">$59.99</p>
+                    <button class="btn btn-outline">Añadir al Carrito</button>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="btn btn-primary" style="background-color: transparent; border: 2px solid var(--primary-color); color: var(--text-color);">Ver Todo el Catálogo</button>
+        </div>
+    </section>
+
+    <!-- Offers Banner -->
+    <section id="ofertas" class="offers">
+        <div class="offer-overlay"></div>
+        <div class="offer-content">
+            <h2>CYBER <span class="highlight">WEEKEND</span></h2>
+            <p>Aprovecha hasta un 50% de descuento en equipamiento seleccionado para entrenamiento de fuerza e indumentaria.</p>
+            <div class="countdown">
+                <div class="time-box">
+                    <span>03</span>
+                    <small>Días</small>
+                </div>
+                <div class="time-box">
+                    <span>12</span>
+                    <small>Horas</small>
+                </div>
+                <div class="time-box">
+                    <span>45</span>
+                    <small>Min</small>
+                </div>
+                <div class="time-box">
+                    <span>10</span>
+                    <small>Seg</small>
+                </div>
+            </div>
+            <button class="btn btn-primary">Ir a Ofertas</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacto" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Branding -->
+                <div class="footer-col">
+                    <div class="logo" style="margin-bottom: 20px;">Sport<span class="highlight">Zone</span></div>
+                    <p>Tu destino número uno para equipamiento deportivo de calidad premium. Entrena como un verdadero profesional.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Enlaces Rápidos -->
+                <div class="footer-col">
+                    <h4>Enlaces Rápidos</h4>
+                    <ul>
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#productos">Tienda</a></li>
+                        <li><a href="#ofertas">Descuentos Especiales</a></li>
+                        <li><a href="#">Nuestro Blog</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Soporte -->
+                <div class="footer-col">
+                    <h4>Atención al Cliente</h4>
+                    <ul>
+                        <li><a href="#">Preguntas Frecuentes</a></li>
+                        <li><a href="#">Política de Envíos</a></li>
+                        <li><a href="#">Devoluciones</a></li>
+                        <li><a href="#">Guía de Tallas</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Boletín -->
+                <div class="footer-col">
+                    <h4>Newsletter</h4>
+                    <p>Únete y recibe 10% de descuento en tu primera compra y noticias exclusivas.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Tu correo electrónico" required>
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 SportZone. Todos los derechos reservados. Diseñado para Ganadores.</p>
+        </div>
+    </footer>
+</body>
+</html>
