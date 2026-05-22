@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory
-from database import init_db, SessionLocal, User
+from database import init_db, SessionLocal, User, Producto
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -8,12 +8,13 @@ app = Flask(__name__, template_folder=BASE_DIR)
 # Inicializar Base de Datos
 init_db()
 
-# Crear un usuario administrador por defecto
+# ── Usuario admin por defecto ──────────────────────────────────────────────
 def create_default_admin():
     db = SessionLocal()
     try:
         if not db.query(User).filter(User.username == "admin").first():
-            admin = User(username="admin", email="admin@sportzone.com", password="admin123", role="admin")
+            admin = User(username="admin", email="admin@sportzone.com",
+                         password="admin123", role="admin")
             db.add(admin)
             db.commit()
     finally:
@@ -21,34 +22,43 @@ def create_default_admin():
 
 create_default_admin()
 
+# ── Estáticos ──────────────────────────────────────────────────────────────
 @app.route('/style.css')
 def get_style():
     return send_from_directory(BASE_DIR, 'style.css')
 
+# ── Páginas públicas ───────────────────────────────────────────────────────
 @app.route('/')
 def index():
-    return render_template('index.html')
+    db = SessionLocal()
+    try:
+        # Solo mostrar productos aprobados al público
+        productos = db.query(Producto).filter(Producto.estado == "Aprobado").all()
+        return render_template('index.html', productos=productos)
+    finally:
+        db.close()
 
+# ── Auth ───────────────────────────────────────────────────────────────────
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
         db = SessionLocal()
         try:
-            user = db.query(User).filter(User.username == username, User.password == password).first()
+            user = db.query(User).filter(
+                User.username == username,
+                User.password == password
+            ).first()
             if not user:
                 return render_template('login.html', error="Credenciales inválidas")
-            
-            # Login básico con cookies
-            resp = make_response(redirect(url_for('admin_users')))
+            resp = make_response(redirect(url_for('dashboard')))
             resp.set_cookie('user_role', user.role)
             resp.set_cookie('user_name', user.username)
+            resp.set_cookie('user_id', str(user.id))
             return resp
         finally:
             db.close()
-            
     return render_template('login.html')
 
 @app.route('/logout')
@@ -56,51 +66,58 @@ def logout():
     resp = make_response(redirect(url_for('index')))
     resp.delete_cookie('user_role')
     resp.delete_cookie('user_name')
+    resp.delete_cookie('user_id')
     return resp
 
-# Panel de Gestión (CRUD)
+@app.route('/dashboard')
+def dashboard():
+    role = request.cookies.get('user_role')
+    if role == 'admin':
+        return redirect(url_for('admin_users'))
+    elif role == 'ofertante':
+        return redirect(url_for('mis_productos'))
+    return redirect(url_for('login'))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 1 — Gestión de Usuarios (Admin)
+# ══════════════════════════════════════════════════════════════════════════════
 @app.route('/admin/users')
 def admin_users():
-    role = request.cookies.get('user_role')
-    if role != 'admin':
+    if request.cookies.get('user_role') != 'admin':
         return redirect(url_for('login'))
-        
     db = SessionLocal()
     try:
         users = db.query(User).all()
-        return render_template('admin.html', users=users, current_user=request.cookies.get('user_name'))
+        return render_template('admin.html', users=users,
+                                current_user=request.cookies.get('user_name'))
     finally:
         db.close()
 
 @app.route('/admin/users/create', methods=['POST'])
 def create_user():
-    role_cookie = request.cookies.get('user_role')
-    if role_cookie != 'admin':
+    if request.cookies.get('user_role') != 'admin':
         return redirect(url_for('login'))
-        
     username = request.form.get('username')
-    email = request.form.get('email')
+    email    = request.form.get('email')
     password = request.form.get('password')
-    role = request.form.get('role')
-    
+    role     = request.form.get('role')
     db = SessionLocal()
     try:
-        existing_user = db.query(User).filter((User.username == username) | (User.email == email)).first()
-        if not existing_user:
-            new_user = User(username=username, email=email, password=password, role=role)
-            db.add(new_user)
+        existe = db.query(User).filter(
+            (User.username == username) | (User.email == email)
+        ).first()
+        if not existe:
+            db.add(User(username=username, email=email,
+                        password=password, role=role))
             db.commit()
     finally:
         db.close()
-        
     return redirect(url_for('admin_users'))
 
 @app.route('/admin/users/delete/<int:user_id>', methods=['POST'])
 def delete_user(user_id):
-    role_cookie = request.cookies.get('user_role')
-    if role_cookie != 'admin':
+    if request.cookies.get('user_role') != 'admin':
         return redirect(url_for('login'))
-        
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.id == user_id).first()
@@ -109,8 +126,173 @@ def delete_user(user_id):
             db.commit()
     finally:
         db.close()
-        
     return redirect(url_for('admin_users'))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 2 — HU-01: Registrar Producto (Ofertante)
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/productos/nuevo', methods=['GET', 'POST'])
+def nuevo_producto():
+    if request.cookies.get('user_role') != 'ofertante':
+        return redirect(url_for('login'))
+
+    errores = []
+    if request.method == 'POST':
+        titulo      = request.form.get('titulo', '').strip()
+        descripcion = request.form.get('descripcion', '').strip()
+        precio_raw  = request.form.get('precio', '').strip()
+        categoria   = request.form.get('categoria', '').strip()
+        stock_raw   = request.form.get('stock', '0').strip()
+        imagen_url  = request.form.get('imagen_url', '').strip()
+
+        if not titulo:       errores.append('El título es obligatorio.')
+        if not descripcion:  errores.append('La descripción es obligatoria.')
+        if not precio_raw:   errores.append('El precio es obligatorio.')
+        if not categoria:    errores.append('La categoría es obligatoria.')
+
+        try:
+            precio = float(precio_raw)
+            stock  = int(stock_raw)
+        except ValueError:
+            errores.append('Precio debe ser número decimal y stock un número entero.')
+            precio, stock = 0, 0
+
+        if not errores:
+            db = SessionLocal()
+            try:
+                producto = Producto(
+                    titulo       = titulo,
+                    descripcion  = descripcion,
+                    precio       = precio,
+                    categoria    = categoria,
+                    stock        = stock,
+                    imagen_url   = imagen_url or None,
+                    estado       = 'Pendiente',
+                    ofertante_id = int(request.cookies.get('user_id'))
+                )
+                db.add(producto)
+                db.commit()
+                return redirect(url_for('mis_productos'))
+            finally:
+                db.close()
+
+    return render_template('producto_form.html', modo='nuevo', errores=errores, producto=None)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 2 — HU-02: Editar / Eliminar Producto (Ofertante)
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/mis-productos')
+def mis_productos():
+    if request.cookies.get('user_role') != 'ofertante':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        uid = int(request.cookies.get('user_id', 0))
+        productos = db.query(Producto).filter(Producto.ofertante_id == uid).all()
+        return render_template('mis_productos.html', productos=productos)
+    finally:
+        db.close()
+
+@app.route('/productos/editar/<int:pid>', methods=['GET', 'POST'])
+def editar_producto(pid):
+    if request.cookies.get('user_role') != 'ofertante':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        uid      = int(request.cookies.get('user_id', 0))
+        producto = db.query(Producto).filter(Producto.id == pid).first()
+        if not producto or producto.ofertante_id != uid:
+            return redirect(url_for('mis_productos'))
+
+        errores = []
+        if request.method == 'POST':
+            titulo      = request.form.get('titulo', '').strip()
+            descripcion = request.form.get('descripcion', '').strip()
+            precio_raw  = request.form.get('precio', '').strip()
+            categoria   = request.form.get('categoria', '').strip()
+            stock_raw   = request.form.get('stock', '0').strip()
+            imagen_url  = request.form.get('imagen_url', '').strip()
+
+            if not titulo:      errores.append('El título es obligatorio.')
+            if not descripcion: errores.append('La descripción es obligatoria.')
+
+            if not errores:
+                producto.titulo      = titulo
+                producto.descripcion = descripcion
+                producto.precio      = float(precio_raw)
+                producto.categoria   = categoria
+                producto.stock       = int(stock_raw)
+                producto.imagen_url  = imagen_url or None
+                producto.estado      = 'Pendiente'   # ← vuelve a Pendiente
+                db.commit()
+                return redirect(url_for('mis_productos'))
+
+        return render_template('producto_form.html', modo='editar',
+                               producto=producto, errores=errores)
+    finally:
+        db.close()
+
+@app.route('/productos/eliminar/<int:pid>', methods=['POST'])
+def eliminar_producto(pid):
+    if request.cookies.get('user_role') != 'ofertante':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        uid      = int(request.cookies.get('user_id', 0))
+        producto = db.query(Producto).filter(Producto.id == pid).first()
+        if producto and producto.ofertante_id == uid:
+            db.delete(producto)
+            db.commit()
+    finally:
+        db.close()
+    return redirect(url_for('mis_productos'))
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 2 — HU-03: Validación por Admin
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/admin/productos')
+def admin_productos():
+    if request.cookies.get('user_role') != 'admin':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        pendientes = db.query(Producto).filter(Producto.estado == 'Pendiente').all()
+        aprobados  = db.query(Producto).filter(Producto.estado == 'Aprobado').all()
+        rechazados = db.query(Producto).filter(Producto.estado == 'Rechazado').all()
+        return render_template('admin_productos.html',
+                               pendientes=pendientes,
+                               aprobados=aprobados,
+                               rechazados=rechazados)
+    finally:
+        db.close()
+
+@app.route('/admin/productos/<int:pid>/aprobar', methods=['POST'])
+def aprobar_producto(pid):
+    if request.cookies.get('user_role') != 'admin':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        p = db.query(Producto).filter(Producto.id == pid).first()
+        if p:
+            p.estado = 'Aprobado'
+            db.commit()
+    finally:
+        db.close()
+    return redirect(url_for('admin_productos'))
+
+@app.route('/admin/productos/<int:pid>/rechazar', methods=['POST'])
+def rechazar_producto(pid):
+    if request.cookies.get('user_role') != 'admin':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        p = db.query(Producto).filter(Producto.id == pid).first()
+        if p:
+            p.estado = 'Rechazado'
+            db.commit()
+    finally:
+        db.close()
+    return redirect(url_for('admin_productos'))
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
