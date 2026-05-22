@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Productos - Admin</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { font-family:'Segoe UI',sans-serif; background:#f5f5f5; }
+        tbody tr td { color: #000000 !important; }
+        tbody tr { background: #ffffff; }
+        .nav { background:#e63946; padding:14px 30px; display:flex; justify-content:space-between; align-items:center; }
+        .nav a { color:#fff; text-decoration:none; font-weight:600; }
+        .container { max-width:960px; margin:40px auto; padding:0 20px; }
+        h2 { color:#e63946; }
+        h3 { margin-top:30px; border-left:4px solid #e63946; padding-left:12px; }
+        table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-top:12px; }
+        th { background:#343a40; color:#fff; padding:13px 12px; text-align:left; }
+        td { padding:11px 12px; border-bottom:1px solid #eee; vertical-align:middle; }
+        tr:last-child td { border-bottom:none; }
+        .btn-aprobar { background:#198754; color:#fff; border:none; padding:7px 16px; border-radius:6px; cursor:pointer; font-weight:700; }
+        .btn-rechazar{ background:#e63946; color:#fff; border:none; padding:7px 16px; border-radius:6px; cursor:pointer; font-weight:700; margin-left:6px; }
+        .badge { padding:5px 12px; border-radius:20px; font-size:13px; font-weight:700; }
+        .badge-pendiente { background:#fff3cd; color:#856404; }
+        .badge-aprobado  { background:#d1e7dd; color:#0f5132; }
+        .badge-rechazado { background:#f8d7da; color:#842029; }
+        .empty { color:#888; font-style:italic; padding:10px 0; }
+        .tabs { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+        .tab-count { background:#e63946; color:#fff; border-radius:20px; padding:2px 10px; font-size:13px; font-weight:700; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <span style="color:#fff;font-weight:700;font-size:18px">🏆 SportZone — Admin</span>
+    <div>
+        <a href="/admin/users" style="margin-right:16px">Gestión Usuarios</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </div>
+</div>
+<div class="container">
+    <h2>🛡️ Validación de Productos</h2>
+
+    <!-- PENDIENTES -->
+    <h3>⏳ Pendientes <span class="tab-count">{{ pendientes|length }}</span></h3>
+    {% if pendientes %}
+    <table>
+        <thead>
+            <tr><th>Título</th><th>Ofertante</th><th>Categoría</th><th>Precio</th><th>Descripción</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+        {% for p in pendientes %}
+        <tr>
+            <td><strong>{{ p.titulo }}</strong></td>
+            <td>{{ p.ofertante.username }}</td>
+            <td>{{ p.categoria }}</td>
+            <td>Bs. {{ "%.2f"|format(p.precio) }}</td>
+            <td style="max-width:200px;font-size:13px;color:#555">{{ p.descripcion[:60] }}{% if p.descripcion|length > 60 %}...{% endif %}</td>
+            <td>
+                <form method="POST" action="/admin/productos/{{ p.id }}/aprobar" style="display:inline">
+                    <button class="btn-aprobar">✅ Aprobar</button>
+                </form>
+                <form method="POST" action="/admin/productos/{{ p.id }}/rechazar" style="display:inline">
+                    <button class="btn-rechazar">❌ Rechazar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p class="empty">No hay productos pendientes de revisión.</p>{% endif %}
+
+    <!-- APROBADOS -->
+<h3>✅ Aprobados <span class="tab-count" style="background:#198754">{{ aprobados|length }}</span></h3>
+{% if aprobados %}
+<table>
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Ofertante</th>
+            <th>Categoría</th>
+            <th>Precio</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in aprobados %}
+    <tr style="color:#000000;">
+        <td style="color:#000;font-weight:600;">{{ p.titulo }}</td>
+        <td style="color:#000;">{{ p.ofertante.username }}</td>
+        <td style="color:#000;">{{ p.categoria }}</td>
+        <td style="color:#000;">Bs. {{ "%.2f"|format(p.precio) }}</td>
+        <td><span class="badge badge-aprobado">Aprobado</span></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}<p class="empty">No hay productos aprobados aún.</p>{% endif %}
+
+    <!-- RECHAZADOS -->
+    <h3>❌ Rechazados <span class="tab-count" style="background:#6c757d">{{ rechazados|length }}</span></h3>
+    {% if rechazados %}
+    <table>
+        <thead><tr><th>Título</th><th>Ofertante</th><th>Categoría</th><th>Precio</th><th>Estado</th></tr></thead>
+        <tbody>
+        {% for p in rechazados %}
+        <tr>
+            <td>{{ p.titulo }}</td>
+            <td>{{ p.ofertante.username }}</td>
+            <td>{{ p.categoria }}</td>
+            <td>Bs. {{ "%.2f"|format(p.precio) }}</td>
+            <td><span class="badge badge-rechazado">Rechazado</span></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p class="empty">No hay productos rechazados.</p>{% endif %}
+</div>
+</body>
+</html>

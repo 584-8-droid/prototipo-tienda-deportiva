@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Productos - SportZone</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+    body { font-family: 'Segoe UI', sans-serif; background:#f5f5f5; }
+    .container { max-width:900px; margin:40px auto; padding:0 20px; }
+    h2 { color:#e63946; }
+    .btn-nuevo { background:#e63946; color:#fff; padding:10px 22px; border-radius:8px; text-decoration:none; font-weight:700; display:inline-block; margin-bottom:20px; }
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+    th { background:#e63946; color:#ffffff; padding:14px 12px; text-align:left; }
+    td { padding:12px; border-bottom:1px solid #eee; color:#000000 !important; vertical-align:middle; }
+    tr { background:#ffffff; }
+    tr:last-child td { border-bottom:none; }
+    .badge { padding:5px 12px; border-radius:20px; font-size:13px; font-weight:700; }
+    .badge-pendiente { background:#fff3cd; color:#856404; }
+    .badge-aprobado  { background:#d1e7dd; color:#0f5132; }
+    .badge-rechazado { background:#f8d7da; color:#842029; }
+    .btn-edit { background:#0077b6; color:#fff; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; text-decoration:none; font-size:13px; }
+    .btn-del  { background:#e63946; color:#fff; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+    .empty { text-align:center; padding:40px; color:#888; }
+    .nav { background:#e63946; padding:14px 30px; display:flex; justify-content:space-between; align-items:center; }
+    .nav a { color:#fff; text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="nav">
+    <span style="color:#fff;font-weight:700;font-size:18px">🏆 SportZone</span>
+    <div>
+        <a href="/admin/users" style="margin-right:16px">Panel Admin</a>
+        <a href="/logout">Cerrar Sesión</a>
+    </div>
+</div>
+<div class="container">
+    <h2>🏪 Mis Productos</h2>
+    <a href="/productos/nuevo" class="btn-nuevo">➕ Agregar Producto</a>
+
+    {% if productos %}
+    <table>
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in productos %}
+        <tr>
+            <td><strong>{{ p.titulo }}</strong></td>
+            <td>{{ p.categoria }}</td>
+            <td>Bs. {{ "%.2f"|format(p.precio) }}</td>
+            <td>{{ p.stock }}</td>
+            <td>
+                <span class="badge badge-{{ p.estado.lower() }}">{{ p.estado }}</span>
+            </td>
+            <td>
+                <a href="/productos/editar/{{ p.id }}" class="btn-edit">✏️ Editar</a>
+                <form method="POST" action="/productos/eliminar/{{ p.id }}"
+                      style="display:inline"
+                      onsubmit="return confirm('¿Eliminar este producto?')">
+                    <button type="submit" class="btn-del">🗑️ Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+        <p>📦 No tienes productos registrados aún.</p>
+        <a href="/productos/nuevo" class="btn-nuevo">➕ Registrar tu primer producto</a>
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
