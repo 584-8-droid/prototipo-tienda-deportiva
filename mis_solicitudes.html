@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Solicitudes</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+        .navbar { background: #1a1a2e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .navbar a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #1a1a2e; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th { background: #1a1a2e; color: white; padding: 0.8rem 1rem; text-align: left; }
+        td { padding: 0.8rem 1rem; border-bottom: 1px solid #eee; vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        .badge-pendiente { background: #fff3cd; color: #856404; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+        .badge-aceptado  { background: #d4edda; color: #155724; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+        .badge-rechazado { background: #f8d7da; color: #721c24; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.85rem; font-weight: bold; }
+        .btn-aceptar  { padding: 0.4rem 0.9rem; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 0.4rem; }
+        .btn-rechazar { padding: 0.4rem 0.9rem; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .no-data { text-align: center; padding: 3rem; color: #888; }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <strong>🏅 SportZone</strong>
+    <div>
+        <a href="/mis-productos">Mis Productos</a>
+        <a href="/logout">Cerrar sesión</a>
+        <a href="/mis-solicitudes">📬 Solicitudes</a>
+    </div>
+</div>
+
+<div class="container">
+    <h1>📬 Solicitudes Recibidas</h1>
+
+    {% if solicitudes %}
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Demandante</th>
+                <th>Email / Tel.</th>
+                <th>Mensaje</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for s in solicitudes %}
+        <tr>
+            <td>{{ s.id }}</td>
+            <td><strong>{{ s.producto.titulo }}</strong></td>
+            <td>{{ s.nombre_demandante }}</td>
+            <td>{{ s.email_demandante }}<br><small>{{ s.telefono or '' }}</small></td>
+            <td>{{ s.mensaje or '—' }}</td>
+            <td><small>{{ s.fecha_solicitud.strftime('%d/%m/%Y %H:%M') }}</small></td>
+            <td>
+                {% if s.estado == 'Pendiente' %}
+                    <span class="badge-pendiente">Pendiente</span>
+                {% elif s.estado == 'Aceptado' %}
+                    <span class="badge-aceptado">Aceptado</span>
+                {% else %}
+                    <span class="badge-rechazado">Rechazado</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if s.estado == 'Pendiente' %}
+                <form method="POST" action="/solicitudes/responder/{{ s.id }}/aceptar" style="display:inline">
+                    <button class="btn-aceptar">✔ Aceptar</button>
+                </form>
+                <form method="POST" action="/solicitudes/responder/{{ s.id }}/rechazar" style="display:inline">
+                    <button class="btn-rechazar">✖ Rechazar</button>
+                </form>
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="no-data">📭 Todavía no tienes solicitudes recibidas.</div>
+    {% endif %}
+</div>
+</body>
+</html>
