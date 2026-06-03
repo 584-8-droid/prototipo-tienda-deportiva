@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory
-from database import init_db, SessionLocal, User, Producto
+from database import init_db, SessionLocal, User, Producto, Solicitud
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -293,6 +293,128 @@ def rechazar_producto(pid):
     finally:
         db.close()
     return redirect(url_for('admin_productos'))
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 3 — HU-01: Búsqueda de Productos/Servicios (Demandante)
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/buscar')
+def buscar_productos():
+    filtro   = request.args.get('filtro', 'recientes')
+    busqueda = request.args.get('q', '').strip()
+
+    db = SessionLocal()
+    try:
+        query = db.query(Producto).filter(Producto.estado == 'Aprobado')
+
+        if busqueda:
+            query = query.filter(
+                (Producto.titulo.ilike(f'%{busqueda}%')) |
+                (Producto.descripcion.ilike(f'%{busqueda}%')) |
+                (Producto.categoria.ilike(f'%{busqueda}%'))
+            )
+
+        if filtro == 'recientes':
+            query = query.order_by(Producto.fecha_creacion.desc())
+        elif filtro == 'mejor_calificados':
+            query = query.order_by(Producto.calificacion.desc())
+        elif filtro == 'mas_solicitados':
+            query = query.order_by(Producto.veces_solicitado.desc())
+
+        productos = query.all()
+        return render_template('buscar.html',
+                               productos=productos,
+                               filtro=filtro,
+                               busqueda=busqueda)
+    finally:
+        db.close()
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 3 — HU-02: Solicitar Producto/Servicio (Demandante)
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/solicitar/<int:pid>', methods=['GET', 'POST'])
+def solicitar_producto(pid):
+    db = SessionLocal()
+    try:
+        producto = db.query(Producto).filter(
+            Producto.id == pid,
+            Producto.estado == 'Aprobado'
+        ).first()
+
+        if not producto:
+            return redirect(url_for('buscar_productos'))
+
+        errores = []
+        if request.method == 'POST':
+            nombre   = request.form.get('nombre', '').strip()
+            email    = request.form.get('email', '').strip()
+            telefono = request.form.get('telefono', '').strip()
+            mensaje  = request.form.get('mensaje', '').strip()
+
+            if not nombre:  errores.append('El nombre es obligatorio.')
+            if not email:   errores.append('El email es obligatorio.')
+            if '@' not in email and email:
+                errores.append('El email no es válido.')
+
+            if not errores:
+                solicitud = Solicitud(
+                    producto_id       = pid,
+                    nombre_demandante = nombre,
+                    email_demandante  = email,
+                    telefono          = telefono,
+                    mensaje           = mensaje,
+                    estado            = 'Pendiente'
+                )
+                db.add(solicitud)
+                # Incrementar contador
+                producto.veces_solicitado += 1
+                db.commit()
+                return render_template('solicitar.html',
+                                       producto=producto,
+                                       exito=True,
+                                       errores=[])
+
+        return render_template('solicitar.html',
+                               producto=producto,
+                               exito=False,
+                               errores=errores)
+    finally:
+        db.close()
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPRINT 3 — HU-03: Confirmación de Solicitudes (Ofertante)
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/mis-solicitudes')
+def mis_solicitudes():
+    if request.cookies.get('user_role') != 'ofertante':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        uid = int(request.cookies.get('user_id', 0))
+        # Traer solicitudes de los productos del ofertante
+        solicitudes = db.query(Solicitud).join(Producto).filter(
+            Producto.ofertante_id == uid
+        ).order_by(Solicitud.fecha_solicitud.desc()).all()
+
+        return render_template('mis_solicitudes.html', solicitudes=solicitudes)
+    finally:
+        db.close()
+
+@app.route('/solicitudes/responder/<int:sid>/<accion>', methods=['POST'])
+def responder_solicitud(sid, accion):
+    if request.cookies.get('user_role') != 'ofertante':
+        return redirect(url_for('login'))
+    db = SessionLocal()
+    try:
+        uid = int(request.cookies.get('user_id', 0))
+        solicitud = db.query(Solicitud).join(Producto).filter(
+            Solicitud.id == sid,
+            Producto.ofertante_id == uid
+        ).first()
+        if solicitud and accion in ['aceptar', 'rechazar']:
+            solicitud.estado = 'Aceptado' if accion == 'aceptar' else 'Rechazado'
+            db.commit()
+    finally:
+        db.close()
+    return redirect(url_for('mis_solicitudes'))
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
