@@ -415,6 +415,65 @@ def responder_solicitud(sid, accion):
     finally:
         db.close()
     return redirect(url_for('mis_solicitudes'))
+# ══════════════════════════════════════════════════════════════════════════════
+# CALIFICACIONES — Ver formulario de calificación
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/calificar/<int:sid>', methods=['GET', 'POST'])
+def calificar(sid):
+    db = SessionLocal()
+    try:
+        solicitud = db.query(Solicitud).filter(
+            Solicitud.id == sid,
+            Solicitud.estado == 'Aceptado'
+        ).first()
+
+        if not solicitud:
+            return redirect(url_for('buscar_productos'))
+
+        # Si ya fue calificada, no permitir de nuevo
+        if solicitud.calificacion:
+            return render_template('calificar.html',
+                                   solicitud=solicitud,
+                                   ya_calificado=True)
+
+        errores = []
+        if request.method == 'POST':
+            calificacion = request.form.get('calificacion', '').strip()
+            comentario   = request.form.get('comentario', '').strip()
+
+            if not calificacion:
+                errores.append('Debes seleccionar una calificación.')
+            else:
+                cal = int(calificacion)
+                if cal < 1 or cal > 5:
+                    errores.append('La calificación debe ser entre 1 y 5.')
+
+            if not errores:
+                solicitud.calificacion = cal
+                solicitud.comentario   = comentario
+
+                # Recalcular promedio del producto
+                producto = solicitud.producto
+                todas = db.query(Solicitud).filter(
+                    Solicitud.producto_id == producto.id,
+                    Solicitud.calificacion != None
+                ).all()
+                total = sum(s.calificacion for s in todas) + cal
+                cantidad = len(todas) + 1
+                producto.calificacion = round(total / cantidad, 1)
+
+                db.commit()
+                return render_template('calificar.html',
+                                       solicitud=solicitud,
+                                       ya_calificado=True,
+                                       exito=True)
+
+        return render_template('calificar.html',
+                               solicitud=solicitud,
+                               ya_calificado=False,
+                               errores=errores)
+    finally:
+        db.close()
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
