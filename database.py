@@ -52,6 +52,8 @@ class Solicitud(Base):
     mensaje            = Column(Text, nullable=True)
     estado             = Column(String(20), default="Pendiente")  # Pendiente/Aceptado/Rechazado
     fecha_solicitud    = Column(DateTime, default=datetime.utcnow)
+    calificacion       = Column(Integer, nullable=True)
+    comentario         = Column(String(200), nullable=True)
     producto           = relationship("Producto", backref="solicitudes")
 
 def init_db():
