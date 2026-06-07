@@ -370,7 +370,7 @@ def solicitar_producto(pid):
                 return render_template('solicitar.html',
                                        producto=producto,
                                        exito=True,
-                                       solicitud_id=solicitar.id,
+                                       solicitud_id=solicitud.id,
                                        errores=[])
 
         return render_template('solicitar.html',
