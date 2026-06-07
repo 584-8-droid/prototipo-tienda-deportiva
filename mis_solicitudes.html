@@ -46,7 +46,8 @@
                 <th>Mensaje</th>
                 <th>Fecha</th>
                 <th>Estado</th>
-                <th>Acción</th>
+                <th>Respuesta</th>
+                <th>Calificacion</th>
             </tr>
         </thead>
         <tbody>
@@ -67,18 +68,31 @@
                     <span class="badge-rechazado">Rechazado</span>
                 {% endif %}
             </td>
-            <td>
-                {% if s.estado == 'Pendiente' %}
-                <form method="POST" action="/solicitudes/responder/{{ s.id }}/aceptar" style="display:inline">
-                    <button class="btn-aceptar">✔ Aceptar</button>
-                </form>
-                <form method="POST" action="/solicitudes/responder/{{ s.id }}/rechazar" style="display:inline">
-                    <button class="btn-rechazar">✖ Rechazar</button>
-                </form>
-                {% else %}
-                    —
-                {% endif %}
-            </td>
+           <td>
+               {% if s.estado == 'Pendiente' %}
+               <form method="POST" action="/solicitudes/responder/{{ s.id }}/aceptar" style="display:inline">
+                   <button class="btn-aceptar">✔ Aceptar</button>
+               </form>
+               <form method="POST" action="/solicitudes/responder/{{ s.id }}/rechazar" style="display:inline">
+                   <button class="btn-rechazar">✖ Rechazar</button>
+               </form>
+               {% else %}
+                   <span>—</span>
+               {% endif %}
+         </td>
+         <td>
+             {% if s.calificacion %}
+                 <span style="color:#f39c12">
+                     {% for i in range(s.calificacion) %}★{% endfor %}
+                     {% for i in range(5 - s.calificacion) %}☆{% endfor %}
+                </span>
+                <br><small>{{ s.comentario or '' }}</small>
+            {% elif s.estado == 'Aceptado' %}
+                <span style="color:#888">Esperando calificación</span>
+            {% else %}
+                 —
+            {% endif %}
+        </td>
         </tr>
         {% endfor %}
         </tbody>
