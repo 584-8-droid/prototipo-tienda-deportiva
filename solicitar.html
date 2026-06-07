@@ -49,11 +49,14 @@
     </div>
 
     {% if exito %}
-    <div class="exito">
-        <h3>✅ ¡Solicitud enviada correctamente!</h3>
-        <p>El ofertante revisará tu solicitud y te contactará pronto.</p>
-        <a href="/buscar" class="btn-volver">Seguir buscando</a>
-    </div>
+<div class="exito">
+    <h3>✅ ¡Solicitud enviada correctamente!</h3>
+    <p>El ofertante revisará tu solicitud. Cuando sea <strong>aceptada</strong> podrás calificar el producto.</p>
+    <p style="color:#555;font-size:0.9rem">Guarda este enlace para calificar después:</p>
+    <code style="background:#f0f0f0;padding:0.3rem 0.6rem;border-radius:4px;font-size:0.85rem">/calificar/{{ solicitud_id }}</code>
+    <br>
+    <a href="/buscar" class="btn-volver">Seguir buscando</a>
+</div>
     {% else %}
     <div class="form-box">
         <h3>📋 Datos para la Solicitud</h3>
