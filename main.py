@@ -475,6 +475,8 @@ def calificar(sid):
                                errores=errores)
     finally:
         db.close()
+        @app.route('/mis-pedidos', methods=['GET', 'POST'])
+def mis_pedidos():
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
