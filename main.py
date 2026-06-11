@@ -477,6 +477,38 @@ def calificar(sid):
         db.close()
         @app.route('/mis-pedidos', methods=['GET', 'POST'])
 def mis_pedidos():
+    if request.method == 'POST':
+        email_buscado = request.form.get('email', '').strip()
+        if email_buscado:
+            db = SessionLocal()
+            try:
+                solicitudes = db.query(Solicitud).filter(
+                    Solicitud.email_demandante == email_buscado
+                ).order_by(Solicitud.fecha_solicitud.desc()).all()
+                solicitudes_data = []
+                for s in solicitudes:
+                    solicitudes_data.append({
+                        'id': s.id,
+                        'producto_titulo': s.producto.titulo,
+                        'producto_id': s.producto_id,
+                        'nombre': s.nombre_demandante,
+                        'email': s.email_demandante,
+                        'mensaje': s.mensaje,
+                        'estado': s.estado,
+                        'fecha': s.fecha_solicitud.strftime('%d/%m/%Y %H:%M'),
+                        'calificacion': s.calificacion,
+                        'comentario': s.comentario
+                    })
+            finally:
+                db.close()
+            return render_template('mis_pedidos.html',
+                                   solicitudes=solicitudes_data,
+                                   email=email_buscado,
+                                   buscado=True)
+    return render_template('mis_pedidos.html',
+                           solicitudes=[],
+                           email='',
+                           buscado=False)
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
