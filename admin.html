@@ -77,10 +77,17 @@
     <header class="navbar" style="background-color: rgba(18, 18, 18, 0.95);">
         <div class="container">
             <div class="logo"><a href="/" style="color: inherit;">Sport<span class="highlight">Zone</span></a></div>
-            <nav class="nav-links">
-                <span style="color: var(--primary-color); font-weight: bold;">Hola, {{ current_user }}</span>
-                <a href="/logout">Cerrar Sesión</a>
-            </nav>
+            <nav style="background:#1a1a2e; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+    <strong style="color:white; font-size:1.2rem;">🏅 SportZone</strong>
+    <div style="display:flex; gap:0.8rem; flex-wrap:wrap; align-items:center;">
+        <a href="/" style="color:white; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; background:#2c2c4e;">🏠 Inicio</a>
+        <a href="/buscar" style="color:white; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; background:#2c2c4e;">🔍 Buscar</a>
+        <a href="/admin/users" style="color:white; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; background:#2980b9;">👥 Usuarios</a>
+        <a href="/admin/productos" style="color:white; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; background:#27ae60;">📦 Productos</a>
+        <span style="color:#e94560; font-weight:bold;">Hola, admin</span>
+        <a href="/logout" style="color:white; text-decoration:none; padding:0.4rem 0.8rem; border-radius:6px; background:#e94560;">🚪 Cerrar sesión</a>
+    </div>
+</nav>
         </div>
     </header>
 
