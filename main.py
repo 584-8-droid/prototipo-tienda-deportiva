@@ -475,7 +475,7 @@ def calificar(sid):
                                errores=errores)
     finally:
         db.close()
-        @app.route('/mis-pedidos', methods=['GET', 'POST'])
+@app.route('/mis-pedidos', methods=['GET', 'POST'])
 def mis_pedidos():
     if request.method == 'POST':
         email_buscado = request.form.get('email', '').strip()
