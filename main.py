@@ -497,7 +497,8 @@ def mis_pedidos():
                         'estado': s.estado,
                         'fecha': s.fecha_solicitud.strftime('%d/%m/%Y %H:%M'),
                         'calificacion': s.calificacion,
-                        'comentario': s.comentario
+                        'comentario': s.comentario,
+                        'pago_estado': s.pago_estado
                     })
             finally:
                 db.close()
@@ -509,6 +510,35 @@ def mis_pedidos():
                            solicitudes=[],
                            email='',
                            buscado=False)
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGO SIMULADO
+# ══════════════════════════════════════════════════════════════════════════════
+@app.route('/pago/<int:sid>', methods=['GET', 'POST'])
+def pago_simulado(sid):
+    db = SessionLocal()
+    try:
+        solicitud = db.query(Solicitud).filter(
+            Solicitud.id == sid,
+            Solicitud.estado == 'Aceptado'
+        ).first()
+
+        if not solicitud:
+            return redirect(url_for('mis_pedidos'))
+
+        if request.method == 'POST':
+            metodo = request.form.get('metodo')  # 'efectivo' o 'qr'
+            solicitud.pago_estado = 'Pagado'
+            db.commit()
+            return render_template('pago.html',
+                                   solicitud=solicitud,
+                                   metodo=metodo,
+                                   pagado=True)
+
+        return render_template('pago.html',
+                               solicitud=solicitud,
+                               pagado=False)
+    finally:
+        db.close()
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
