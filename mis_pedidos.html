@@ -119,12 +119,21 @@
                     <span class="badge badge-pendiente">⏳ Pendiente</span>
                     <p style="font-size:0.8rem;color:#888">El ofertante revisará pronto</p>
                 {% elif s.estado == 'Aceptado' %}
-                    <span class="badge badge-aceptado">✅ Aceptado</span>
-                    {% if s.calificacion %}
-                        <span class="btn-ya-calificado">⭐ Ya calificaste</span>
-                    {% else %}
-                        <a href="/calificar/{{ s.id }}" class="btn-calificar">⭐ Calificar</a>
-                    {% endif %}
+    <span class="badge badge-aceptado">✅ Aceptado</span>
+
+    {% if s.pago_estado == 'Pagado' %}
+        <p style="font-size:0.8rem;color:#198754;font-weight:bold;margin:0.3rem 0">💰 Pagado</p>
+    {% else %}
+        <a href="/pago/{{ s.id }}" class="btn-calificar" style="background:#198754;margin-bottom:0.5rem;display:block;">
+            💳 Pagar
+        </a>
+    {% endif %}
+
+    {% if s.calificacion %}
+        <span class="btn-ya-calificado">⭐ Ya calificaste</span>
+    {% else %}
+        <a href="/calificar/{{ s.id }}" class="btn-calificar">⭐ Calificar</a>
+    {% endif %}
                 {% else %}
                     <span class="badge badge-rechazado">❌ Rechazado</span>
                     <p style="font-size:0.8rem;color:#888">El ofertante no pudo atenderte</p>
