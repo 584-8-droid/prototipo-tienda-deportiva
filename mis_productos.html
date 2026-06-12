@@ -27,11 +27,15 @@
 </style>
 </head>
 <body>
-<div class="nav">
+<div class="nav" style="flex-wrap:wrap; gap:0.5rem;">
     <span style="color:#fff;font-weight:700;font-size:18px">🏆 SportZone</span>
-    <div>
-        <a href="/admin/users" style="margin-right:16px">Panel Admin</a>
-        <a href="/logout">Cerrar Sesión</a>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+        <a href="/" style="margin:0; padding:0.4rem 0.8rem; background:rgba(255,255,255,0.15); border-radius:6px;">🏠 Inicio</a>
+        <a href="/buscar" style="margin:0; padding:0.4rem 0.8rem; background:rgba(255,255,255,0.15); border-radius:6px;">🔍 Buscar</a>
+        <a href="/mis-productos" style="margin:0; padding:0.4rem 0.8rem; background:rgba(255,255,255,0.3); border-radius:6px; font-weight:bold;">📦 Mis Productos</a>
+        <a href="/productos/nuevo" style="margin:0; padding:0.4rem 0.8rem; background:#27ae60; border-radius:6px; font-weight:bold;">➕ Nuevo</a>
+        <a href="/mis-solicitudes" style="margin:0; padding:0.4rem 0.8rem; background:#2980b9; border-radius:6px; font-weight:bold;">📬 Solicitudes</a>
+        <a href="/logout" style="margin:0; padding:0.4rem 0.8rem; background:rgba(0,0,0,0.3); border-radius:6px;">🚪 Salir</a>
     </div>
 </div>
 <div class="container">
