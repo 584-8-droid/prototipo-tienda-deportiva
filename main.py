@@ -539,24 +539,6 @@ def pago_simulado(sid):
                                pagado=False)
     finally:
         db.close()
-@app.route('/reset-db-ahora')
-def reset_db():
-    from database import Base, engine
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
-    try:
-        admin = User(
-            username="admin",
-            email="admin@sportzone.com",
-            password="admin123",
-            role="admin"
-        )
-        db.add(admin)
-        db.commit()
-    finally:
-        db.close()
-    return "<h2>✅ Base de datos reseteada. <a href='/login'>Ir al login</a></h2>"
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
